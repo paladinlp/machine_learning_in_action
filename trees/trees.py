@@ -55,9 +55,5 @@ def chooseBestFeatureToSplit(dataSet):
 
 
 
-
-
-
-
 if __name__ == '__main__' :
     print(chooseBestFeatureToSplit(creatDataSet()))
