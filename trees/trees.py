@@ -10,7 +10,7 @@ def creatDataSet():
         ['0', '1', 'no'],
     ]
     labels = ['no surfacing','flippers']
-    return dataSet
+    return dataSet, labels
 def cal_ShannonEnt(dataSet):   #计算香农熵
     labelCounts = {}
     item_nums = len(dataSet)
@@ -51,9 +51,53 @@ def chooseBestFeatureToSplit(dataSet):
             bestFeature = i
     return bestFeature
 
+import operator
+def majorityCnt(classList):
+    classCount = {}
+    for vote in classList:
+        if vote not in classCount.keys(): classCount[vote] =  0
+        classCount[vote] += 1
+    sortedclassCount =sorted(classCount.items(), key = operator.itemgetter(1), reverse = True)
+    return sortedclassCount[0][0]
+
+
+
+def creatTree(dataSet,labels):
+    classList = [item[-1] for item in dataSet]
+
+    if classList.count(classList[0]) == len(classList):
+        return classList[0]
+    if len(dataSet[0]) == 1 :
+        print(dataSet[0])
+        return majorityCnt(classList)
+    bestFeat = chooseBestFeatureToSplit(dataSet)
+
+    bestFeatLabel = labels[bestFeat]
+    myTree = {bestFeatLabel:{ }}
+    del(labels[bestFeat])
+    featValues =[example[bestFeat] for example in dataSet]
+    uniqueVals = set(featValues)
+    print(uniqueVals)
+    for value in uniqueVals:
+        subLabels = labels[:]
+        myTree[bestFeatLabel][value]= creatTree(splitDataSet(dataSet,bestFeat, value), subLabels)
+        # print(myTree[bestFeatLabel][value])
+    return myTree
+
 
 
 
 
 if __name__ == '__main__' :
-    print(chooseBestFeatureToSplit(creatDataSet()))
+    # print(chooseBestFeatureToSplit(creatDataSet()))
+    # classList = [item[-1] for item in creatDataSet()]
+    # print(majorityCnt(classList))
+    dataSet, labels = creatDataSet()
+    print(creatTree(dataSet, labels))
+    # dataSet, labels = creatDataSet()
+    # bestFeat =1
+    # del (labels[bestFeat])
+    # print(labels)
+    # dataSet, labels = creatDataSet()
+
+    # print()
