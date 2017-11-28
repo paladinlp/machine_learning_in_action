@@ -65,3 +65,19 @@ if __name__ == '__main__':
         getNumLeafs(mytree),
         getTreeDepth(mytree)
     )
+
+
+def plotMidText(cntrPt,parentPt,txtString):
+    xMid = (parentPt[0]-cntrPt[0])/2.0+cntrPt[0]
+    yMid = (parentPt[0] - cntrPt[0]) / 2.0 + cntrPt[0]
+    createPlot.ax1.text(xMid,yMid,txtString)
+
+def plotTree(myTree,parentPt,nodeTxt):
+    numLeafs = getNumLeafs(myTree)
+    depth = getTreeDepth(myTree)
+    firstStr = list(myTree.keys())[0]
+    cntrPt = (plotTree.xOff + (1.0+float(numLeafs))/2.0/plotTree.totalW,plotTree.yOff)
+    plotMidText(cntrPt, parentPt, nodeTxt)
+    plotNode(firstStr, cntrPt, parentPt, decisionNode)
+    secondDict = myTree[firstStr]
+
