@@ -59,18 +59,13 @@ def retrieveTree(i):
     listOfTree = [{'no surfacing':{0:'no',1:{'flippers':{0:'no',1:'yes'}}}},
                   {'no surfacing':{0:'no',1:{'flippers':{0:{'head':{0:'no',1:'yes'}},1:'no'}}}}]
     return listOfTree[i]
-if __name__ == '__main__':
-    mytree = retrieveTree(0)
-    print(
-        getNumLeafs(mytree),
-        getTreeDepth(mytree)
-    )
+
 
 
 def plotMidText(cntrPt,parentPt,txtString):
-    xMid = (parentPt[0]-cntrPt[0])/2.0+cntrPt[0]
-    yMid = (parentPt[0] - cntrPt[0]) / 2.0 + cntrPt[0]
-    createPlot.ax1.text(xMid,yMid,txtString)
+    xMid = (parentPt[0]- cntrPt[0])/2.0+cntrPt[0]
+    yMid = (parentPt[1] - cntrPt[1]) / 2.0 + cntrPt[1]
+    createPlot.ax1.text(xMid, yMid, txtString)
 
 def plotTree(myTree,parentPt,nodeTxt):
     numLeafs = getNumLeafs(myTree)
@@ -80,4 +75,48 @@ def plotTree(myTree,parentPt,nodeTxt):
     plotMidText(cntrPt, parentPt, nodeTxt)
     plotNode(firstStr, cntrPt, parentPt, decisionNode)
     secondDict = myTree[firstStr]
+    plotTree.yOff = plotTree.yOff-1.0/plotTree.totalD
+    for key in secondDict.keys():
+        if type(secondDict[key]).__name__ == 'dict':
+            plotTree(secondDict[key],cntrPt,str(key))
+        else:
+            plotTree.xOff = plotTree.xOff+1.0/plotTree.totalW
+            plotNode(secondDict[key],(plotTree.xOff,plotTree.yOff),cntrPt,leafNode)
+            plotMidText((plotTree.xOff,plotTree.yOff),cntrPt,str(key))
+    plotTree.yOff = plotTree.yOff+1.0/plotTree.totalD
 
+def createPlot(inTree):
+    fig = plt.figure(1,facecolor='white')
+    fig.clf()
+    axprops = dict(xticks= [],yticks = [])
+    createPlot.ax1 = plt.subplot(111,frameon = False,**axprops)
+    plotTree.totalW = float(getNumLeafs(inTree))
+    plotTree.totalD = float(getTreeDepth(inTree))
+    plotTree.xOff = -0.5/plotTree.totalW;plotTree.yOff = 1.0
+    plotTree(inTree,(0.5,1.0),"")
+    plt.show()
+
+
+def classify(inputTree,featLabels,testVec):
+    firstStr = list(inputTree.keys())[0]
+    secondDict = inputTree[firstStr]
+    featIndex = featLabels.index(firstStr)
+    for key in secondDict.keys():
+        if testVec[featIndex] == key:
+            if type(secondDict[key]).__name__ == 'dict':
+                classLabel = classify(secondDict[key],featLabels,testVec)
+            else:
+                classLabel = secondDict[key]
+    return classLabel
+
+
+if __name__ == '__main__':
+    mytree = retrieveTree(0)
+    # createPlot(mytree)
+
+    labels = ['no surfacing', 'flippers']
+    # first = list(mytree.keys())[0]
+    # secondDict = mytree[first]
+    # for key in secondDict.keys():
+    #     print(key)
+    print(classify(mytree,labels,[1,1]))
