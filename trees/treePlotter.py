@@ -23,7 +23,7 @@ def createPlot():
 # def createPlot():
 #     fig = plt.figure(1, facecolor = 'white')
 #     fig.clf()
-#     createPlot.ax1 = plt.subplot(111, frameon = False)
+#     createPlot.ax 1 = plt.subplot(111, frameon = False)
 #     plotNode('nonLeafNode', (0.2, 0.1), (0.4, 0.8), decisionNode)
 #     plotNode('LeafNode', (0.8, 0.1), (0.6, 0.8), leafNode)
 #     plt.show()
