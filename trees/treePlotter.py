@@ -2,7 +2,9 @@
 __author__ = 'paladinlp'
 __date__ = '2017/11/27 18:39'
 
+
 import matplotlib.pyplot as plt
+import trees as tree
 
 decisionNode = dict(boxstyle = 'sawtooth',fc = '0.8')
 
@@ -111,12 +113,19 @@ def classify(inputTree,featLabels,testVec):
 
 
 if __name__ == '__main__':
-    mytree = retrieveTree(0)
-    # createPlot(mytree)
+    # mytree = retrieveTree(0)
+    # # createPlot(mytree)
+    #
+    # labels = ['no surfacing', 'flippers']
+    # # first = list(mytree.keys())[0]
+    # # secondDict = mytree[first]
+    # # for key in secondDict.keys():
+    # #     print(key)
+    # print(classify(mytree,labels,[1,1]))
+    with open('lenses.txt') as f:
+        lenses = [inst.strip().split('\t') for inst in f.readlines()]
+    lensesLabels = ['age','prescript','astigmatic','tearRate']
+    lenseTree = tree.creatTree(lenses,lensesLabels)
+    print(lenseTree)
+    createPlot(lenseTree)
 
-    labels = ['no surfacing', 'flippers']
-    # first = list(mytree.keys())[0]
-    # secondDict = mytree[first]
-    # for key in secondDict.keys():
-    #     print(key)
-    print(classify(mytree,labels,[1,1]))
