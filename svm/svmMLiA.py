@@ -41,4 +41,3 @@ def smoSimple(dataMatIn,classLabels,C,toler,maxIter):
 
 
 
-
