@@ -12,7 +12,7 @@ def loadDataSet():
                  ['stop', 'posting', 'stupid', 'worthless', 'garbage'],
                  ['mr', 'licks', 'ate', 'my', 'steak', 'how', 'to', 'stop', 'him'],
                  ['quit', 'buying', 'worthless', 'dog', 'food', 'stupid']]
-    classVec = [0,1,0,1,0,1]    #1 is abusive, 0 not
+    classVec = [0, 1, 0, 1, 0, 1]    #1 is abusive, 0 not
     return postingList,classVec
 
 def createVocabList(dataSet):
