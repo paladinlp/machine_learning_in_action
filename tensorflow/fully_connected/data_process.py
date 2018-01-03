@@ -89,8 +89,7 @@ with open('data.txt','w') as fW:
 # with open('data.pkl', 'wb') as f :
 #     pickle.dump(data, f)
 
-
-
+3;
 
 
 
