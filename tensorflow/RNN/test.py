@@ -4,38 +4,46 @@ __date__ = '2017/12/29 21:58'
 
 import numpy as np
 
-# with open('../fully_connected/80W.txt','r',encoding='utf-8') as f:
-#     data = f.readlines()
-#
-#
-# labels = np.ones((800000),dtype=int)
-# for i, item in enumerate(data):
-#     item = list(item)
-#     if i == 0:
-#         labels[i] = item[2]
-#     else:
-#         if i < 9:
-#             labels[i] = item[2]
-#         else:
-#             if i < 99:
-#                 labels[i] = item[3]
-#             else:
-#                 if i < 999:
-#                     labels[i] = item[4]
-#                 else:
-#                     if i < 9999:
-#                         labels[i] = item[5]
-#                     else:
-#                         if i < 99999:
-#                             labels[i] = item[6]
-#                         else:
-#                             if i < 999999:
-#
-#                                 labels[i] = item[7]
-#                             else:
-#                                 if i < 9999999:
-#                                     labels[i] = item[8]
+with open('../fully_connected/80W.txt','r',encoding='utf-8') as f:
+    data = f.readlines()
 
+
+
+
+labels = np.ones((800000),dtype=int)
+for i, item in enumerate(data):
+    item = list(item)
+    if i == 0:
+        labels[i] = item[3]
+    else:
+        if i < 9:
+            labels[i] = item[2]
+        else:
+            if i < 99:
+                labels[i] = item[3]
+            else:
+                if i < 999:
+                    labels[i] = item[4]
+                else:
+                    if i < 9999:
+                        labels[i] = item[5]
+                    else:
+                        if i < 99999:
+                            labels[i] = item[6]
+                        else:
+                            if i < 999999:
+
+                                labels[i] = item[7]
+                            else:
+                                if i < 9999999:
+                                    labels[i] = item[8]
+
+
+
+
+import pickle
+with open('label.pkl','wb') as f:
+    pickle.dump(labels, f)
 
 import random
 

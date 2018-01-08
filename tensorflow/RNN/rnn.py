@@ -2,6 +2,12 @@
 __author__ = 'paladinlp'
 __date__ = '2017/12/30 9:11'
 
+import os
+
+
+
+
+
 import pickle
 with open('data.pkl', 'rb') as f:
     data_number = pickle.load(f)
@@ -10,7 +16,7 @@ with open('label.pkl', 'rb') as f:
 seq_len = 200
 import numpy as np
 
-feature = np.zeros((len(data_number),seq_len),dtype = int)
+feature = np.zeros((len(data_number),seq_len), dtype = int)
 for i,row in enumerate(data_number):
     feature[i, -len(row):] = np.array(row)[:seq_len]
 
@@ -40,7 +46,7 @@ with graph.as_default():
 
 lstm_size = 256
 lstm_layers = 1
-batch_size = 500
+batch_size = 1
 learning_rate = 0.001
 
 with graph.as_default():
@@ -81,39 +87,41 @@ epochs = 1
 with graph.as_default():
     saver = tf.train.Saver()
 
-with tf.Session(graph=graph) as sess:
-    sess.run(tf.global_variables_initializer())
-    iteration = 1
-    for e in range(epochs):
-        state = sess.run(initial_state)
+# with tf.Session(graph=graph) as sess:
+#     sess.run(tf.global_variables_initializer())
+#     iteration = 1
+#     for e in range(epochs):
+#         state = sess.run(initial_state)
+#
+#         for ii, (x, y) in enumerate(get_batches(feature_train, label_train, batch_size), 1):
+#             feed = {inputs_: x,
+#                     labels_: y[:, None],
+#                     keep_prob: 0.5,
+#                     initial_state: state}
+#             loss, state, _ = sess.run([cost, final_state, optimizer], feed_dict=feed)
+#
+#             if iteration % 5 == 0:
+#                 print("Epoch: {}/{}".format(e, epochs),
+#                       "Iteration: {}".format(iteration),
+#                       "Train loss: {:.3f}".format(loss))
+#
+#             if iteration % 25 == 0:
+#                 val_acc = []
+#                 val_state = sess.run(cell.zero_state(batch_size, tf.float32))
+#                 for x, y in get_batches(feature_val, label_val, batch_size):
+#                     feed = {inputs_: x,
+#                             labels_: y[:, None],
+#                             keep_prob: 1,
+#                             initial_state: val_state}
+#                     batch_acc, val_state = sess.run([accuracy, final_state], feed_dict=feed)
+#                     val_acc.append(batch_acc)
+#                 print("Val acc: {:.3f}".format(np.mean(val_acc)))
+#                 break
+#             iteration += 1
+#
+#     # saver.save(sess, os.path.join(os.getcwd(), "checkpoints/sentiment.ckpt"))
+#     saver.save(sess, "./checkpoints/sentiment.ckpt")
 
-        for ii, (x, y) in enumerate(get_batches(feature_train, label_train, batch_size), 1):
-            feed = {inputs_: x,
-                    labels_: y[:, None],
-                    keep_prob: 0.5,
-                    initial_state: state}
-            loss, state, _ = sess.run([cost, final_state, optimizer], feed_dict=feed)
-
-            if iteration % 5 == 0:
-                print("Epoch: {}/{}".format(e, epochs),
-                      "Iteration: {}".format(iteration),
-                      "Train loss: {:.3f}".format(loss))
-
-            if iteration % 25 == 0:
-                val_acc = []
-                val_state = sess.run(cell.zero_state(batch_size, tf.float32))
-                for x, y in get_batches(feature_val, label_val, batch_size):
-                    feed = {inputs_: x,
-                            labels_: y[:, None],
-                            keep_prob: 1,
-                            initial_state: val_state}
-                    batch_acc, val_state = sess.run([accuracy, final_state], feed_dict=feed)
-                    val_acc.append(batch_acc)
-                print("Val acc: {:.3f}".format(np.mean(val_acc)))
-                break
-            iteration += 1
-
-    saver.save(sess, "checkpoints/sentiment.ckpt")
 # test_acc = []
 # print('进行实际测试')
 # with tf.Session(graph=graph) as sess:
@@ -132,13 +140,13 @@ with tf.Session(graph=graph) as sess:
 # 进行判别测试
 
 def test1():
-    inputWords = u'专业信息科技有限公司感谢您的致电！，我公司待遇优良，服务素质好，专业为您提供一站式汽车保养服务'
+    inputWords = u'五一旅游的宝贝，XX手机低价呈现，购物中大奖;低价降到底，好运转不停，黄金周不产黄金，五一节却有五折'
     inputWordsList = []
     import pickle
     with open('vocab_to_int.pkl', 'rb') as f:
         vocab_to_int = pickle.load( f)
     for item in inputWords:
-        if item  not in vocab_to_int.keys():
+        if item not in vocab_to_int.keys():
             inputWordsList.append(0)
         else:
             inputWordsList.append(vocab_to_int[item])
@@ -148,13 +156,14 @@ def test1():
     feature[0,-len(row):] = np.array(row)[:seq_len]
     label = np.ones((1,1))
     # feature[0, -len(row):] = np.array(row)[:seq_len]
+    print(feature)
     return feature, label
 
 with tf.Session(graph=graph) as sess:
     sess.run(tf.global_variables_initializer())
-    saver.restore(sess, tf.train.latest_checkpoint('checkpoints'))
+    saver.restore(sess, tf.train.latest_checkpoint('./checkpoints'))
     test_state = sess.run(cell.zero_state(batch_size, tf.float32))
-    print(test1())
+
     feed = {inputs_: test1()[0],
             labels_: test1()[1],
             keep_prob: 1,

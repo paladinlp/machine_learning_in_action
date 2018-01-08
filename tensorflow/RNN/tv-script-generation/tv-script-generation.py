@@ -80,3 +80,5 @@ tests.test_tokenize(token_lookup)
 
 
 helper.preprocess_and_save_data(data_dir, token_lookup, create_lookup_tables)
+
+
