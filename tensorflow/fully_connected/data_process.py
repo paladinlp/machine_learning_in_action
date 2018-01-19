@@ -85,6 +85,9 @@ with open('data.txt','w') as fW:
         fW.write(data[i])
         fW.write('\n')
 
+
+
+
 # import pickle
 # with open('data.pkl', 'wb') as f :
 #     pickle.dump(data, f)

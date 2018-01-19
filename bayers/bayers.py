@@ -4,7 +4,7 @@ __date__ = '2017/12/10 14:33'
 
 
 from numpy import *
-import re
+import feedparser
 def loadDataSet():
     postingList=[['my', 'dog', 'has', 'flea', 'problems', 'help', 'please'],
                  ['maybe', 'not', 'take', 'him', 'to', 'dog', 'park', 'stupid'],
@@ -35,8 +35,8 @@ def bagOfWord2VecMN(vocabList,inputSet):
     for word in inputSet:
         if word in vocabList:
             returnVec[vocabList.index(word)] += 1
-        else:
-            print('the word :%s is not in my Vocabulary!' %  word)
+        # else:
+        #     print('the word :%s is not in my Vocabulary!' %  word)
     return returnVec
 
 
@@ -68,56 +68,130 @@ def classifyNB(vec2Classify,p0Vec,p1Vec,pClass1):
     else:
         return 0
 
-def textParse(bigString):
+
+def textParse(bigString):  # input is big string, #output is word list
+    import re
     listOfTokens = re.split(r'\W*', bigString)
     return [tok.lower() for tok in listOfTokens if len(tok) > 2]
 
+
 def spamTest():
-
-    docList=[];  classList = []; fullText = []
+    docList = [];
+    classList = [];
+    fullText = []
     for i in range(1, 26):
+        wordList = textParse(open('email/spam/%d.txt' % i).read())
+        docList.append(wordList)
+        fullText.extend(wordList)
+        classList.append(1)
+        wordList = textParse(open('email/ham/%d.txt' % i).read())
+        docList.append(wordList)
+        fullText.extend(wordList)
+        classList.append(0)
+    vocabList = createVocabList(docList)  # create vocabulary
+    trainingSet = list(range(50));
 
-        wordList = textParse(open('email/spam/%d.txt' % i, ).read())
+    testSet = []  # create test set
+    for i in range(10):
+        randIndex = int(random.uniform(0, len(trainingSet)))
+        testSet.append(trainingSet[randIndex])
+        del (trainingSet[randIndex])
+    trainMat = [];
+    trainClasses = []
+    for docIndex in trainingSet:  # train the classifier (get probs) trainNB0
+        trainMat.append(bagOfWord2VecMN(vocabList, docList[docIndex]))
+        trainClasses.append(classList[docIndex])
+    p0V, p1V, pSpam = trainNB0(array(trainMat), array(trainClasses))
+    errorCount = 0
+
+    for docIndex in testSet:  # classify the remaining items
+        wordVector = bagOfWord2VecMN(vocabList, docList[docIndex])
+        if classifyNB(array(wordVector), p0V, p1V, pSpam) != classList[docIndex]:
+            errorCount += 1
+            print("classification error", docList[docIndex])
+    print('the error rate is: ', float(errorCount) / len(testSet))
+    # return vocabList,fullText
+
+
+
+def calMostFreq(vocabList,fullText):
+    import operator
+    freqDict ={}
+    for token in vocabList:
+        freqDict[token] = fullText.count(token)
+    sortedFreq = sorted(freqDict.items(), key=operator.itemgetter(1), reverse=True)
+    return sortedFreq[:30]
+
+def localWords(feed1,feed0):
+    docList=[];classList = [];fullText=[]
+    minLen = min(len(feed1['entries']),len(feed0['entries']))
+    for i in range(minLen):
+        wordList = textParse(feed1['entries'][i]['summary'])
         docList.append(wordList)
         fullText.append(wordList)
         classList.append(1)
-        wordList = textParse(open('email/ham/%d.txt' % i, ).read())
+        wordList = textParse(feed0['entries'][i]['summary'])
         docList.append(wordList)
         fullText.append(wordList)
         classList.append(0)
     vocabList = createVocabList(docList)
-    trainingSet = range(50) ; testSet = []
-    for i in range(10):
-
-        randIndex = int(random.uniform(0, len(trainingSet)))
-        print(trainingSet[randIndex])
+    top30Words = calMostFreq(vocabList, fullText)
+    for pairW in top30Words:
+        if pairW[0] in vocabList:vocabList.remove(pairW[0])
+    trainingSet = list(range(2*minLen)); testSet = []
+    for i in range(20):
+        randIndex = int(random.uniform(0,len(trainingSet)))
         testSet.append(trainingSet[randIndex])
         del(trainingSet[randIndex])
     trainMat = []; trainClasses = []
     for docIndex in trainingSet:
-        trainMat.append(setOfWord2Vec(vocabList, docList[docIndex]))
+        trainMat.append(bagOfWord2VecMN(vocabList, docList[docIndex]))
         trainClasses.append(classList[docIndex])
-    p0v, p1v, pSpam = trainNB0(trainMat, array(trainClasses))
+    p0V, p1V, pSpam = trainNB0(array(trainMat), array(trainClasses))
 
-    errCount = 0
+    errorCount =0
     for docIndex in testSet:
-        wordVector = setOfWord2Vec(vocabList, docList[docIndex])
+        wordVector = bagOfWord2VecMN(vocabList, docList[docIndex])
+        if classifyNB(array(wordVector), p0V, p1V, pSpam) != classList[docIndex]:
+            errorCount += 1
 
-        if classifyNB(array(wordVector), p0v, p1v, pSpam) != classList[docIndex]:
-            errCount += 1
-    print('the error rate is :', float(errCount)/len(testSet))
+    print('the error rate is: ', float(errorCount) / len(testSet))
+    return vocabList, p0V, p1V
 
 
 
+
+
+
+
+
+
+
+
+def getTopWords(ny,sf):
+    import operator
+    vocabList, p0V, p1V = localWords(ny, sf)
+    topNY=[];topSF=[]
+    for i in range(len(p0V)):
+        if p0V[i] > -6.0:topSF.append((vocabList[i],p0V[i]))
+        if p1V[i] > -6.0: topNY.append((vocabList[i], p1V[i]))
+    sortedSF = sorted(topSF,key = lambda pair:pair[1],reverse =True)
+    print('SF**SF**SF**SF**SF**SF**SF**SF**SF**SF**SF**SF**SF**SF**SF**SF**')
+    for item in sortedSF:
+        print(item[0])
+    sortedNY= sorted(topSF, key=lambda pair: pair[1], reverse=True)
+    print('NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**NY**')
+    for item in sortedNY:
+        print(item[0])
 
 if __name__ == '__main__':
-    listOPost, listClasses = loadDataSet()
-    myVocabList = createVocabList(listOPost)
-    trainMat = []
-    for postinDoc in listOPost:
-        trainMat.append(setOfWord2Vec(myVocabList, postinDoc))
-    p0v, p1v, pAb = trainNB0(trainMat, listClasses)
-
+    # listOPost, listClasses = loadDataSet()
+    # myVocabList = createVocabList(listOPost)
+    # trainMat = []
+    # for postinDoc in listOPost:
+    #     trainMat.append(setOfWord2Vec(myVocabList,postinDoc))
+    # p0v, p1v, pAb = trainNB0(trainMat, listClasses)
+    #
     # testEntry = ['love', 'my', 'dalmation']
     # thisDoc = array(setOfWord2Vec(myVocabList,testEntry))
     # print (testEntry,'classified as :', classifyNB(thisDoc ,p0v, p1v, pAb))
@@ -125,14 +199,15 @@ if __name__ == '__main__':
     # testEntry = ['stupid', 'garbage']
     # thisDoc = array(setOfWord2Vec(myVocabList, testEntry))
     # print(testEntry, 'classified as :', classifyNB(thisDoc, p0v, p1v, pAb))
+    #
+    # spamTest()
+    ny = feedparser.parse('http://newyork.craigslist.org/stp/index.rss')
+    sy = feedparser.parse('http://sfbay.craigslist.org/stp/index.rss')
+    # vocabList, pSF, pNY = localWords(ny, sy)
 
-    spamTest()
-    # for i in range(1, 26):
-    #     wordList = textParse(open('email/spam/%d.txt' % i,'r').read())
-    #     print(wordList)
 
 
-
+    getTopWords(ny,sy)
 
 
 
